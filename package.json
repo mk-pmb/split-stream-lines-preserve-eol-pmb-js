@@ -1,5 +1,5 @@
 { "name": "split-stream-lines-preserve-eol-pmb",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Split a stream into lines that include their line terminator if they had one.",
   "keywords": [
     "eol",

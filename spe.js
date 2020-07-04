@@ -26,8 +26,8 @@ EX = function makeLineSplitter(opt) {
   if (!opt) { opt = false; }
   var collect = [], nGrp = opt.nEolGroups,
     combine = decideCombinator(opt.combine),
-    preSplit = splitWithSeparateMatchGroups(opt.sep || /(\n)/),
-    thrOpt = Object.assign({}, opt.throughOpt), thrStm;
+    preSplit = splitWithSeparateMatchGroups(opt.sep || /(\n)/), pipeLine,
+    thrOpt = Object.assign({}, opt.throughOpt);
   if (!Number.isFinite(nGrp)) { nGrp = 1; }
   if (opt.obj || (!combine)) { thrOpt.objectMode = true; }
 
@@ -45,12 +45,12 @@ EX = function makeLineSplitter(opt) {
 
   function onEnd() { return (collect.length ? shipIt(this) : null); }
 
-  thrStm = through2pr(thrOpt, onChunk,
-    (opt.discardRemainder ? undefined : onEnd));
-  return (thrOpt.objectMode
-    ? pumpify.obj(preSplit, thrStm)
-    : pumpify(preSplit, thrStm)
-    );
+  pipeLine = [
+    preSplit,
+    through2pr(thrOpt, onChunk, (opt.discardRemainder ? undefined : onEnd)),
+  ].concat(opt.extraPipes).filter(Boolean);
+  if (thrOpt.objectMode) { return pumpify.obj(pipeLine); }
+  return pumpify(pipeLine);
 };
 
 
